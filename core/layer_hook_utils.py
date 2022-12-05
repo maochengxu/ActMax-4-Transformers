@@ -229,8 +229,10 @@ def register_hook_by_module_names(target_name, target_hook, model, input_size=(3
         print(line_new)
         print("==============================================================================")
         for layer in module_names:
+            print("Something")
             print("{:7} {:8} {:>12} {:>15}".format("", layer,
                 module_types[layer], module_names[layer],))
+            print("Something too")
         raise ValueError("Cannot hook the layer with the name %s\nAvailable names are listed here"%target_name)
     return target_hook_h, module_names, module_types
 

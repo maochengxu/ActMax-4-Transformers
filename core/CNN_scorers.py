@@ -21,10 +21,13 @@ from core.layer_hook_utils import layername_dict, register_hook_by_module_names,
 
 if platform == "linux": # cluster
     # torchhome = "/scratch/binxu/torch/checkpoints"  # CHPC
-    if "ris.wustl.edu" in os.environ['HOSTNAME']:
-        scratchdir = os.environ["SCRATCH1"]
-        torchhome = join(scratchdir, "torch/checkpoints")  # RIS
-    else:
+    try:
+        if "ris.wustl.edu" in os.environ['HOSTNAME']:
+            scratchdir = os.environ["SCRATCH1"]
+            torchhome = join(scratchdir, "torch/checkpoints")  # RIS
+        else:
+            torchhome = torch.hub._get_torch_home()
+    except:
         torchhome = torch.hub._get_torch_home()
 else:
     if os.environ['COMPUTERNAME'] == 'DESKTOP-9DDE2RH':  # PonceLab-Desktop 3
@@ -49,68 +52,73 @@ class TorchScorer:
         scores, activations = CNN.score(imgs)
 
     """
-    def __init__(self, model_name, imgpix=227, rawlayername=True, device="cuda"):
+    def __init__(self, model_name, imgpix=224, rawlayername=True, device="cuda"):
         self.imgpix = imgpix
         if isinstance(model_name, torch.nn.Module):
             self.model = model_name
             self.inputsize = (3, imgpix, imgpix)
             self.layername = None
         elif isinstance(model_name, str):
-            if model_name == "vgg16":
-                self.model = models.vgg16(pretrained=True)
-                self.layers = list(self.model.features) + list(self.model.classifier)
-                # self.layername = layername_dict[model_name]
-                self.layername = None if rawlayername else layername_dict["vgg16"]
-                self.inputsize = (3, imgpix, imgpix)
-            elif model_name == "vgg16-face":
-                self.model = models.vgg16(pretrained=False, num_classes=2622)
-                self.model.load_state_dict(torch.load(join(torchhome, "vgg16_face.pt")))
-                self.layers = list(self.model.features) + list(self.model.classifier)
-                self.layername = None if rawlayername else layername_dict["vgg16"]
-                self.inputsize = (3, imgpix, imgpix)
-            elif model_name == "alexnet":
-                self.model = models.alexnet(pretrained=True)
-                self.layers = list(self.model.features) + list(self.model.classifier)
+            # if model_name == "vgg16":
+            #     self.model = models.vgg16(pretrained=True)
+            #     self.layers = list(self.model.features) + list(self.model.classifier)
+            #     # self.layername = layername_dict[model_name]
+            #     self.layername = None if rawlayername else layername_dict["vgg16"]
+            #     self.inputsize = (3, imgpix, imgpix)
+            # elif model_name == "vgg16-face":
+            #     self.model = models.vgg16(pretrained=False, num_classes=2622)
+            #     self.model.load_state_dict(torch.load(join(torchhome, "vgg16_face.pt")))
+            #     self.layers = list(self.model.features) + list(self.model.classifier)
+            #     self.layername = None if rawlayername else layername_dict["vgg16"]
+            #     self.inputsize = (3, imgpix, imgpix)
+            # elif model_name == "alexnet":
+            #     self.model = models.alexnet(pretrained=True)
+            #     self.layers = list(self.model.features) + list(self.model.classifier)
+            #     self.layername = None if rawlayername else layername_dict[model_name]
+            #     self.inputsize = (3, imgpix, imgpix)
+            # elif model_name == "densenet121":
+            #     self.model = models.densenet121(pretrained=True)
+            #     self.layers = list(self.model.features) + [self.model.classifier]
+            #     self.layername = None if rawlayername else layername_dict[model_name]
+            #     self.inputsize = (3, imgpix, imgpix)
+            # elif model_name == "densenet169":
+            #     self.model = models.densenet169(pretrained=True)
+            #     self.layername = None
+            #     self.inputsize = (3, imgpix, imgpix)
+            # elif model_name == "resnet101":
+            #     self.model = models.resnet101(pretrained=True)
+            #     self.inputsize = (3, imgpix, imgpix)
+            #     self.layername = None
+            # elif "resnet50" in model_name:
+            #     if "resnet50-face" in model_name:  # resnet trained on vgg-face dataset.
+            #         self.model = models.resnet50(pretrained=False, num_classes=8631)
+            #         if model_name == "resnet50-face_ft":
+            #             self.model.load_state_dict(torch.load(join(torchhome, "resnet50_ft_weight.pt")))
+            #         elif model_name == "resnet50-face_scratch":
+            #             self.model.load_state_dict(torch.load(join(torchhome, "resnet50_scratch_weight.pt")))
+            #         else:
+            #             raise NotImplementedError("Feasible names are resnet50-face_scratch, resnet50-face_ft")
+            #     else:
+            #         self.model = models.resnet50(pretrained=True)
+            #         if model_name == "resnet50_linf_8":  # robust version of resnet50.
+            #             self.model.load_state_dict(torch.load(join(torchhome, "imagenet_linf_8_pure.pt")))
+            #         elif model_name == "resnet50_linf_4":
+            #             self.model.load_state_dict(torch.load(join(torchhome, "imagenet_linf_4_pure.pt")))
+            #         elif model_name == "resnet50_l2_3_0":
+            #             self.model.load_state_dict(torch.load(join(torchhome, "imagenet_l2_3_0_pure.pt")))
+            #     self.inputsize = (3, imgpix, imgpix)
+            #     self.layername = None
+            # elif model_name == "cornet_s":
+            #     from cornet import cornet_s
+            #     Cnet = cornet_s(pretrained=True)
+            #     self.model = Cnet.module
+            #     self.inputsize = (3, imgpix, imgpix)
+            #     self.layername = None
+            if model_name == "vit_b_16":
+                self.model = models.vit_b_16(pretrained=True)
+                self.layers = list(self.model.encoder.layers) + list(self.model.heads)
                 self.layername = None if rawlayername else layername_dict[model_name]
                 self.inputsize = (3, imgpix, imgpix)
-            elif model_name == "densenet121":
-                self.model = models.densenet121(pretrained=True)
-                self.layers = list(self.model.features) + [self.model.classifier]
-                self.layername = None if rawlayername else layername_dict[model_name]
-                self.inputsize = (3, imgpix, imgpix)
-            elif model_name == "densenet169":
-                self.model = models.densenet169(pretrained=True)
-                self.layername = None
-                self.inputsize = (3, imgpix, imgpix)
-            elif model_name == "resnet101":
-                self.model = models.resnet101(pretrained=True)
-                self.inputsize = (3, imgpix, imgpix)
-                self.layername = None
-            elif "resnet50" in model_name:
-                if "resnet50-face" in model_name:  # resnet trained on vgg-face dataset.
-                    self.model = models.resnet50(pretrained=False, num_classes=8631)
-                    if model_name == "resnet50-face_ft":
-                        self.model.load_state_dict(torch.load(join(torchhome, "resnet50_ft_weight.pt")))
-                    elif model_name == "resnet50-face_scratch":
-                        self.model.load_state_dict(torch.load(join(torchhome, "resnet50_scratch_weight.pt")))
-                    else:
-                        raise NotImplementedError("Feasible names are resnet50-face_scratch, resnet50-face_ft")
-                else:
-                    self.model = models.resnet50(pretrained=True)
-                    if model_name == "resnet50_linf_8":  # robust version of resnet50.
-                        self.model.load_state_dict(torch.load(join(torchhome, "imagenet_linf_8_pure.pt")))
-                    elif model_name == "resnet50_linf_4":
-                        self.model.load_state_dict(torch.load(join(torchhome, "imagenet_linf_4_pure.pt")))
-                    elif model_name == "resnet50_l2_3_0":
-                        self.model.load_state_dict(torch.load(join(torchhome, "imagenet_l2_3_0_pure.pt")))
-                self.inputsize = (3, imgpix, imgpix)
-                self.layername = None
-            elif model_name == "cornet_s":
-                from cornet import cornet_s
-                Cnet = cornet_s(pretrained=True)
-                self.model = Cnet.module
-                self.inputsize = (3, imgpix, imgpix)
-                self.layername = None
             else:
                 raise NotImplementedError("Cannot find the specified model %s"%model_name)
         else:

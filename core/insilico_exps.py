@@ -17,7 +17,7 @@ from core.Optimizers import CholeskyCMAES # HessAware_Gauss_DC,
 default_init_sigma = 3.0
 default_Aupdate_freq = 10
 class ExperimentEvolution:
-    def __init__(self, model_unit, max_step=100, imgsize=(227, 227), corner=(0, 0), optimizer=None,
+    def __init__(self, model_unit, max_step=100, imgsize=(224, 224), corner=(0, 0), optimizer=None,
                  savedir="", explabel="", GAN="fc6", device="cuda"):
         self.recording = []
         self.scores_all = []
