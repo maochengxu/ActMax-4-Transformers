@@ -115,8 +115,13 @@ class TorchScorer:
             #     self.inputsize = (3, imgpix, imgpix)
             #     self.layername = None
             if model_name == "vit_b_16":
-                self.model = models.vit_b_16(pretrained=True)
+                self.model = models.vit_b_16(weights=models.ViT_B_16_Weights.DEFAULT)
                 self.layers = list(self.model.encoder.layers) + list(self.model.heads)
+                self.layername = None if rawlayername else layername_dict[model_name]
+                self.inputsize = (3, imgpix, imgpix)
+            elif model_name == "alexnet":
+                self.model = models.alexnet(pretrained=True)
+                self.layers = list(self.model.features) + list(self.model.classifier)
                 self.layername = None if rawlayername else layername_dict[model_name]
                 self.inputsize = (3, imgpix, imgpix)
             else:
