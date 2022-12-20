@@ -271,7 +271,7 @@ class ExpSyn(object):
         for i in range(maxiter):
             self.exp = TransformerEvolution(
                 self.model_unit,
-                max_step=60,
+                max_step=100,
                 savedir=self.savedir,
                 explabel=self.explabel,
                 optimizer=self.optimizer,
