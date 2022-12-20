@@ -32,15 +32,15 @@ class TransformerScorer(TorchScorer):
                 # self.layername = None if rawlayername else layername_dict[model_name]
                 self.layername = None
                 self.inputsize = (3, imgpix, imgpix)
-            elif model_name == "vit_b_32":
-                self.model = models.vit_b_32(weights=models.ViT_B_32_Weights.DEFAULT)
+            elif model_name == "vit_l_16":
+                self.model = models.vit_l_16(weights=models.ViT_L_16_Weights.DEFAULT)
                 self.layers = list(self.model.encoder.layers) + list(self.model.heads)
                 self.layername = None
                 self.inputsize = (3, imgpix, imgpix)
-            elif model_name == "vit":
+            elif model_name == "own_vit":
                 model_kwargs = {
-                    "embed_dim": 8,
-                    "hidden_dim": 8,
+                    "embed_dim": 256,
+                    "hidden_dim": 512,
                     "num_heads": 8,
                     "num_layers": 6,
                     "patch_size": 4,
@@ -86,17 +86,7 @@ class TransformerEvolution(ExperimentEvolution):
         GAN="fc6",
         device="cuda",
     ):
-        # super().__init__(
-        #     model_unit,
-        #     max_step,
-        #     imgsize,
-        #     corner,
-        #     optimizer,
-        #     savedir,
-        #     explabel,
-        #     GAN,
-        #     device,
-        # )
+
         self.recording = []
         self.scores_all = []
         self.codes_all = []
@@ -193,6 +183,9 @@ class TransformerEvolution(ExperimentEvolution):
         )
         return resize_select
 
+    def get_all_scores(self):
+        return self.scores_all
+
 
 class ImageLoader(object):
     def __init__(self, datapath) -> None:
@@ -218,8 +211,10 @@ class ImageLoader(object):
             dic_tmp = {"File": [name], "Shape": [str(shape_tmp)]}
             df_tmp = pd.DataFrame(data=dic_tmp)
             self._flies_df = pd.concat([self._flies_df, df_tmp], axis=0)
-
-            img_processed = self.preprocess(img.copy())
+            try:
+                img_processed = self.preprocess(img.copy())
+            except:
+                continue
             self.imgs = torch.concat([self.imgs, img_processed])
         self._num_imgs = self.imgs.shape[0]
         return self._num_imgs
