@@ -1,5 +1,6 @@
 # Data
 /data
+/tmp
 
 # macOS
 .DS_Store
