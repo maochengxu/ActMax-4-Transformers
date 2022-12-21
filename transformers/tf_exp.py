@@ -16,13 +16,15 @@ from core.insilico_exps import ExperimentEvolution, resize_and_pad_tsr
 from core.GAN_utils import upconvGAN
 from core.Optimizers import CholeskyCMAES  # HessAware_Gauss_DC,
 
-from mymodel import VisionTransformer
+from transformers.vit_model import VisionTransformer
 
 default_init_sigma = 3.0
 default_Aupdate_freq = 10
 
 
 class TransformerScorer(TorchScorer):
+    '''This is a scorer for transformers, it is a subclass of TorchScorer
+    It gets the score of a certain unit in a transformer model'''
     def __init__(self, model_name, imgpix=224, rawlayername=True, device="cuda"):
         self.imgpix = imgpix
         if isinstance(model_name, str):
@@ -74,6 +76,9 @@ class TransformerScorer(TorchScorer):
 
 
 class TransformerEvolution(ExperimentEvolution):
+    """It is a subclass of ExperimentEvolution, which is a subclass of Experiment
+    It is a class for running the evolution experiment on transformers
+    """
     def __init__(
         self,
         model_unit,
@@ -171,6 +176,7 @@ class TransformerEvolution(ExperimentEvolution):
         self.generations = np.array(self.generations)
 
     def save_best_imgs(self, classname, num):
+        """Save the best image"""
         idx = np.argmax(self.scores_all)
         select_code = self.codes_all[idx : idx + 1, :]
         score_select = self.scores_all[idx]
@@ -183,16 +189,15 @@ class TransformerEvolution(ExperimentEvolution):
         )
         return resize_select
 
-    def get_all_scores(self):
-        return self.scores_all
-
 
 class ImageLoader(object):
-    def __init__(self, datapath) -> None:
+    """Load images from a folder"""
+    def __init__(self, datapath, info=False) -> None:
         self.datapath = datapath
         self._flies_df = pd.DataFrame(columns=["File", "Shape"])
         self._num_imgs = 0
         self.imgs = torch.Tensor([])
+        self.info = info
 
     @staticmethod
     def preprocess(img):
@@ -207,10 +212,11 @@ class ImageLoader(object):
                 list_of_files.append(os.path.join(root, file))
         for name in tqdm(list_of_files):
             img = io.imread(name)
-            shape_tmp = img.shape
-            dic_tmp = {"File": [name], "Shape": [str(shape_tmp)]}
-            df_tmp = pd.DataFrame(data=dic_tmp)
-            self._flies_df = pd.concat([self._flies_df, df_tmp], axis=0)
+            if self.info:
+                shape_tmp = img.shape
+                dic_tmp = {"File": [name], "Shape": [str(shape_tmp)]}
+                df_tmp = pd.DataFrame(data=dic_tmp)
+                self._flies_df = pd.concat([self._flies_df, df_tmp], axis=0)
             try:
                 img_processed = self.preprocess(img.copy())
             except:
@@ -224,7 +230,8 @@ class ImageLoader(object):
 
 
 class ExpScores(object):
-    def __init__(self, path, model_unit) -> None:
+    """Compute scores for both natural and generated images for a given model"""
+    def __init__(self, model_unit, path=None) -> None:
         self._path = path
         self._scores = None
         self.model_unit = model_unit
@@ -246,6 +253,14 @@ class ExpScores(object):
         return scores
 
     def syn_scores(self, syn=None):
+        """Get the scores for a given synthetic image
+
+        Args:
+            syn (str | tensor, optional): the path or the image. Defaults to None.
+
+        Returns:
+            ndarray: the scores
+        """
         with torch.no_grad():
             if isinstance(syn, str):
                 # Read the syn image
@@ -253,12 +268,13 @@ class ExpScores(object):
                 syn_img_tsr = torch.Tensor(syn_img).permute((2, 0, 1)).unsqueeze(dim=0)
                 syn_score = self.model.score_tsr(syn_img_tsr)[0]
             else:
-                syn_tsr = syn.permute((2, 0, 1)).unsqueeze(dim=0)
+                syn_tsr = syn.unsqueeze(dim=0)
                 syn_score = self.model.score_tsr(syn_tsr)[0]
             return syn_score
 
 
 class ExpSyn(object):
+    """Generate synthetic images"""
     def __init__(self, model_unit, explabel, optimizer=None, savedir="tmp") -> None:
         self.model_unit = model_unit
         self.optimizer = None

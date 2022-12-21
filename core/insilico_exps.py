@@ -16,6 +16,8 @@ from core.GAN_utils import upconvGAN
 from core.Optimizers import CholeskyCMAES # HessAware_Gauss_DC,
 default_init_sigma = 3.0
 default_Aupdate_freq = 10
+
+import skimage
 class ExperimentEvolution:
     def __init__(self, model_unit, max_step=100, imgsize=(224, 224), corner=(0, 0), optimizer=None,
                  savedir="", explabel="", GAN="fc6", device="cuda"):
@@ -33,10 +35,10 @@ class ExperimentEvolution:
             self.render_tsr = self.G.visualize_batch_np  # this output tensor
             self.render = self.G.render
             self.code_length = self.G.codelen  # 1000 "fc8" 4096 "fc6", "fc7"
-        elif GAN == "BigGAN":
-            from BigGAN_Evolution import BigGAN_embed_render
-            self.render = BigGAN_embed_render
-            self.code_length = 256  # 128 # 128d Class Embedding code or 256d full code could be used.
+        # elif GAN == "BigGAN":
+        #     from BigGAN_Evolution import BigGAN_embed_render
+        #     self.render = BigGAN_embed_render
+        #     self.code_length = 256  # 128 # 128d Class Embedding code or 256d full code could be used.
         else:
             raise NotImplementedError
         if optimizer is None:
@@ -140,7 +142,7 @@ class ExperimentEvolution:
         fig.savefig(join(self.savedir, "Best_Img_%s.png" % (self.explabel)))
         return fig
 
-    def visualize_trajectory(self, show=True):
+    def visualize_trajectory(self, show=True, save=False, type='CNN'):
         gen_slice = np.arange(min(self.generations), max(self.generations)+1)
         AvgScore = np.zeros_like(gen_slice).astype("float64")
         MaxScore = np.zeros_like(gen_slice).astype("float64")
@@ -152,13 +154,39 @@ class ExperimentEvolution:
         plt.plot(gen_slice, AvgScore, color='black', label="Average score")
         plt.plot(gen_slice, MaxScore, color='red', label="Max score")
         plt.xlabel("generation #")
-        plt.ylabel("CNN unit score")
+        if type == 'CNN':
+            plt.ylabel("CNN unit score")
+        elif type == 'TF':
+            plt.ylabel("TF score")
         plt.title("Optimization Trajectory of Score\n")# + title_str)
         plt.legend()
         if show:
             plt.show()
-        figh.savefig(join(self.savedir, "Evolv_Traj_%s.png" % (self.explabel)))
+        if save:
+            figh.savefig(join(self.savedir, "Evolv_Traj_%s.png" % (self.explabel)))
         return figh
+    
+    def save_best_imgs(self, classname, num):
+        idx = np.argmax(self.scores_all)
+        select_code = self.codes_all[idx : idx + 1, :]
+        score_select = self.scores_all[idx]
+        img_select = self.render_tsr(select_code)
+        resize_select = resize_and_pad_tsr(img_select, self.imgsize, self.corner)
+        resize_select = resize_select.cpu().squeeze().permute((1, 2, 0)).numpy()
+        skimage.io.imsave(
+            join(self.savedir, classname, "Best_%s_%d.png" % (self.explabel, num)),
+            skimage.img_as_ubyte(resize_select),
+        )
+        return resize_select
+    
+    def get_all_scores(self):
+        gen_slice = np.arange(min(self.generations), max(self.generations)+1)
+        AvgScore = np.zeros_like(gen_slice).astype("float64")
+        MaxScore = np.zeros_like(gen_slice).astype("float64")
+        for i, geni in enumerate(gen_slice):
+            AvgScore[i] = np.mean(self.scores_all[self.generations == geni])
+            MaxScore[i] = np.max(self.scores_all[self.generations == geni])
+        return AvgScore, MaxScore
 
 
 from skimage.transform import rescale, resize
