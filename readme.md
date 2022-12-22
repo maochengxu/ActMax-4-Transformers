@@ -1,6 +1,8 @@
 # CS-433 Project 2
 
 ## 1. Introduction
+This project is part of the ML course at EPFL in collaboration with Ponce lab at Harvard university. Our main research question is:Do CNNs and Vision Transformers learn visual representations similar to those of the monkey brain?
+Simulating visual neurons with Convolutional Neuron Networks have been of a great interest in order to comprehend the neuronal integration. Given an activation maximization pipeline generating so called prototypes (GAN- derived images obtained via neuronal responses), Vision Transformers are now investigated in order to testify their relevance for understanding similar integration processes. Transformers are thus able to develop super-stimulating prototypes. The prototypes converge quicker to maximum local values although these maxima are less significant in comparison with natural images. Eventually, Transformer's prototypes suggest a greater focus on shapes and on textures.
 
 ## 2. Descriptions
 
