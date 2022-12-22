@@ -52,4 +52,4 @@ Simulating visual neurons with Convolutional Neuron Networks have been of a grea
 | :---:       |    :----:   |  :---:     |
 | Malek       | 288968      | malek.elmekki@epfl.ch|
 | Maocheng    | 338251      | maocheng.xu@epfl.ch |
-| Raphaël     | 123456      |            |
+| Raphaël     | 123456      | raphael.rakotomahanina@epfl.ch |
