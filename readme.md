@@ -16,11 +16,11 @@
 |   ├── montage_utils.py.   # class providd by ponce lab
 │   └── robustCNN_utils.py  # load robust cnns
 
-├── experiments             # Something
+├── experiments             # contains the codes of all experiments
 │   ├── ActMax_own_ViT.ipynb    # generate image from our own Vits implementation
 │   ├── exp_for_CNN.ipynb       # get scores of cnn's generated image and natural images for tench and golf ball class
 |   ├── generate_imgs.py        # generate images from Vit-b-16 model
-│   └── get_evolution_process.ipynb  # run evolutions for different models
+|   ├── get_evolution_process.ipynb  # run evolutions for different models
 │   ├── get_generate_scores.ipynb    # get the scores of generated images for each model
 │   ├── get_nature_scores.ipynb # get the scores of natural images( from Imagenette dataset) for each model
 |   ├── plots.ipynb       # violin plots and evolution plots ( all the models in the same plot)
