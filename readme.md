@@ -10,7 +10,7 @@
 │   ├── CNN_scorers.py      # pytorch CNN scorer that creates functions that map images to activation values of their hidden units.it was adapted to VITs
 │   ├── GAN_utils.py        # torch version of fc6 GANsAlso provides loader and wrapper of various GANs.Currently we have * BigGAN
 |   ├── Optimizers.py       # Optimizers developed by ponce lab
-│   └── geometry_utils.py   # Collection of some Geometric Utility function reusable across script
+|   ├── geometry_utils.py   # Collection of some Geometric Utility function reusable across script
 │   ├── insilico_exps.py    # runs the generations of images and saves the best one
 │   ├── layer_hook_utils.py # functions to call in the forward and backward run
 |   ├── montage_utils.py.   # class providd by ponce lab
