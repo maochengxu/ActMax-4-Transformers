@@ -15,7 +15,7 @@
 │   ├── layer_hook_utils.py # functions to call in the forward and backward run
 |   ├── montage_utils.py.   # class providd by ponce lab
 │   └── robustCNN_utils.py  # load robust cnns
-
+│
 ├── experiments             # contains the codes of all experiments
 │   ├── ActMax_own_ViT.ipynb    # generate image from our own Vits implementation
 │   ├── exp_for_CNN.ipynb       # get scores of cnn's generated image and natural images for tench and golf ball class
@@ -25,7 +25,7 @@
 │   ├── get_nature_scores.ipynb # get the scores of natural images( from Imagenette dataset) for each model
 |   ├── plots.ipynb       # violin plots and evolution plots ( all the models in the same plot)
 │   └── similarity.ipynb  # Vits generated image interpretations
-
+│
 ├── results                 # contains the results of all experiments 
 ├── transformers            # contains implementations of our Vits as wel as tf_exp.py which is the adaptatation of cnn_scorers to Vits
 │   ├── tf_exp.py           # adaptatation of cnn_scorers to Vits
